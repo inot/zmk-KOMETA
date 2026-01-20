@@ -5,3 +5,5 @@ include:
     shield: kometa_right
   - board: nice_nano
     shield: settings_reset
+  - board: zmk_dongle
+    shield: kometa_dongle
