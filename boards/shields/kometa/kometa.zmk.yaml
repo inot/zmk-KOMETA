@@ -7,3 +7,4 @@ requires: [pro_micro]
 siblings:
   - kometa_left
   - kometa_right
+  - kometa_dongle
