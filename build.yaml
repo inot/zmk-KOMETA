@@ -5,5 +5,3 @@ include:
     shield: kometa_right
   - board: nice_nano
     shield: settings_reset
-  - board: nrf52840dongle_nrf52840
-    shield: kometa_dongle

@@ -3,6 +3,3 @@ config SHIELD_KOMETA_LEFT
 
 config SHIELD_KOMETA_RIGHT
     def_bool $(shields_list_contains,kometa_right)
-
-config SHIELD_KOMETA_DONGLE
-    def_bool $(shields_list_contains,kometa_dongle)
