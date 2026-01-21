@@ -1,5 +1,15 @@
 #include "kometa.dtsi"
 
+ / {
+     chosen {
+         zmk,battery = &vddh_batt;
+     };
+
+     vddh_batt: battery {
+         compatible = "zmk,battery-nrf-vddh";
+     };
+ };
+
 &kscan0 {
     col-gpios 
         = <&pro_micro 4 GPIO_ACTIVE_HIGH>   // col0
