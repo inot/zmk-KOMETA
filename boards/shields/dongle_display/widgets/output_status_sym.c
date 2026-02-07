@@ -185,9 +185,9 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_SYM_BT ui
 
 const lv_img_dsc_t sym_bt = {
   .header.cf = ZMK_LV_IMG_CF_I1,
-  .header.w = 7,
-  .header.h = 5,
-  .data_size = 15,
+  .header.w = 9,
+  .header.h = 14,
+  .data_size = 36,
   .data = sym_bt_map,
 };
 
@@ -207,8 +207,8 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_SYM_USB u
 
 const lv_img_dsc_t sym_usb = {
   .header.cf = ZMK_LV_IMG_CF_I1,
-  .header.w = 7,
-  .header.h = 5,
-  .data_size = 15,
+  .header.w = 9,
+  .header.h = 14,
+  .data_size = 36,
   .data = sym_usb_map,
 };
