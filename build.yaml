@@ -12,4 +12,4 @@ include:
   - board: nice_nano
     shield: settings_reset
   - board: nice_nano
-    shield: kometa_dongle dongle_display
+    shield: kometa_dongle i2c_oled dongle_display
