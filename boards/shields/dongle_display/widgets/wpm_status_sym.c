@@ -6,12 +6,10 @@
  
 #include <lvgl.h>
 
- #ifndef LV_COLOR_FORMAT_I1
- #if defined(LV_IMG_CF_INDEXED_1BIT)
- #define LV_COLOR_FORMAT_I1 LV_IMG_CF_INDEXED_1BIT
- #elif defined(LV_IMG_CF_ALPHA_1BIT)
- #define LV_COLOR_FORMAT_I1 LV_IMG_CF_ALPHA_1BIT
- #endif
+ #if defined(LVGL_VERSION_MAJOR) && (LVGL_VERSION_MAJOR >= 9)
+ #define ZMK_LV_IMG_CF_I1 LV_COLOR_FORMAT_I1
+ #else
+ #define ZMK_LV_IMG_CF_I1 LV_IMG_CF_INDEXED_1BIT
  #endif
 
 #ifndef LV_ATTRIBUTE_IMG_SPEEDOMETER
@@ -39,7 +37,7 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_SPEEDOMET
 };
 
 const lv_img_dsc_t sym_speedometer = {
-  .header.cf = LV_COLOR_FORMAT_I1,
+  .header.cf = ZMK_LV_IMG_CF_I1,
   .header.w = 14,
   .header.h = 14,
   .data_size = 36,

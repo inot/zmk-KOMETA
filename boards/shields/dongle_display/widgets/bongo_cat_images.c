@@ -7,10 +7,9 @@
  #include <lvgl.h>
 
  #ifndef LV_COLOR_FORMAT_I1
- #if defined(LV_IMG_CF_INDEXED_1BIT)
  #define LV_COLOR_FORMAT_I1 LV_IMG_CF_INDEXED_1BIT
- #elif defined(LV_IMG_CF_ALPHA_1BIT)
- #define LV_COLOR_FORMAT_I1 LV_IMG_CF_ALPHA_1BIT
+ #ifndef LV_COLOR_FORMAT_I1
+ #define LV_COLOR_FORMAT_I1 LV_IMG_CF_TRUE_COLOR
  #endif
  #endif
 
