@@ -6,8 +6,15 @@
 
 #include <zephyr/kernel.h>
 
+#include <lvgl.h>
+
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
+
+#if !defined(LVGL_VERSION_MAJOR) || (LVGL_VERSION_MAJOR < 9)
+typedef lv_point_t lv_point_precise_t;
+#define lv_anim_set_duration(a, d) lv_anim_set_time((a), (d))
+#endif
 
 #include <zmk/display.h>
 #include <zmk/event_manager.h>

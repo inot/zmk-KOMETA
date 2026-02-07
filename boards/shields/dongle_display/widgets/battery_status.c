@@ -20,6 +20,12 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include "battery_status.h"
 
+#if defined(LVGL_VERSION_MAJOR) && (LVGL_VERSION_MAJOR >= 9)
+#define ZMK_LV_CANVAS_CF LV_COLOR_FORMAT_L8
+#else
+#define ZMK_LV_CANVAS_CF LV_IMG_CF_TRUE_COLOR
+#endif
+
 #if IS_ENABLED(CONFIG_ZMK_DONGLE_DISPLAY_DONGLE_BATTERY)
     #define SOURCE_OFFSET 1
 #else
@@ -30,7 +36,8 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #  define ZMK_SPLIT_BLE_PERIPHERAL_COUNT 0
 #endif
 
-#define BUFFER_SIZE LV_CANVAS_BUF_SIZE(5, 8, LV_COLOR_FORMAT_GET_BPP(LV_COLOR_FORMAT_L8), LV_DRAW_BUF_STRIDE_ALIGN)
+#define BATTERY_CANVAS_W 5
+#define BATTERY_CANVAS_H 8
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -45,13 +52,10 @@ struct battery_object {
     lv_obj_t *label;
 } battery_objects[ZMK_SPLIT_BLE_PERIPHERAL_COUNT + SOURCE_OFFSET];
     
-static lv_color_t battery_image_buffer[ZMK_SPLIT_BLE_PERIPHERAL_COUNT + SOURCE_OFFSET][BUFFER_SIZE];
+static lv_color_t battery_image_buffer[ZMK_SPLIT_BLE_PERIPHERAL_COUNT + SOURCE_OFFSET][BATTERY_CANVAS_W * BATTERY_CANVAS_H];
 
 static void draw_battery(lv_obj_t *canvas, uint8_t level, bool usb_present) {
     lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
-    
-    lv_layer_t layer;
-    lv_canvas_init_layer(canvas, &layer);
 
     lv_draw_rect_dsc_t rect_fill_dsc;
     lv_draw_rect_dsc_init(&rect_fill_dsc);
@@ -84,10 +88,17 @@ static void draw_battery(lv_obj_t *canvas, uint8_t level, bool usb_present) {
     }
 
     if (rect_draw) {
+#if !defined(LVGL_VERSION_MAJOR) || (LVGL_VERSION_MAJOR < 9)
+        lv_canvas_draw_rect(canvas, rect_coords.x1, rect_coords.y1,
+                            rect_coords.x2 - rect_coords.x1 + 1,
+                            rect_coords.y2 - rect_coords.y1 + 1, &rect_fill_dsc);
+#else
+        lv_layer_t layer;
+        lv_canvas_init_layer(canvas, &layer);
         lv_draw_rect(&layer, &rect_fill_dsc, &rect_coords);
+        lv_canvas_finish_layer(canvas, &layer);
+#endif
     }
-
-    lv_canvas_finish_layer(canvas, &layer);
 }
 
 static void set_battery_symbol(lv_obj_t *widget, struct battery_state state) {
@@ -168,7 +179,7 @@ int zmk_widget_dongle_battery_status_init(struct zmk_widget_dongle_battery_statu
         lv_obj_t *image_canvas = lv_canvas_create(widget->obj);
         lv_obj_t *battery_label = lv_label_create(widget->obj);
 
-        lv_canvas_set_buffer(image_canvas, battery_image_buffer[i], 5, 8, LV_COLOR_FORMAT_L8);
+        lv_canvas_set_buffer(image_canvas, battery_image_buffer[i], BATTERY_CANVAS_W, BATTERY_CANVAS_H, ZMK_LV_CANVAS_CF);
 
         lv_obj_align(image_canvas, LV_ALIGN_TOP_RIGHT, 0, i * 10);
         lv_obj_align_to(battery_label, image_canvas, LV_ALIGN_OUT_LEFT_MID, 0, 0);
