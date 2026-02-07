@@ -6,20 +6,28 @@
 
 #include <zephyr/kernel.h>
 
+#include <lvgl.h>
+
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
+#if !defined(LVGL_VERSION_MAJOR) || (LVGL_VERSION_MAJOR < 9)
+typedef lv_point_t lv_point_precise_t;
+#define lv_anim_set_duration(a, d) lv_anim_set_time((a), (d))
+#endif
+
 #include <zmk/display.h>
 #include <zmk/event_manager.h>
-#include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/endpoint_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/usb.h>
-#include <zmk/ble.h>
 #include <zmk/endpoints.h>
 
 #include "output_status.h"
-
+#if IS_ENABLED(CONFIG_ZMK_BLE)
+#  include <zmk/events/ble_active_profile_changed.h>
+#  include <zmk/ble.h>
+#endif
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
 LV_IMG_DECLARE(sym_usb);
@@ -55,7 +63,7 @@ enum selection_line_state {
     selection_line_state_bt
 } current_selection_line_state;
 
-lv_point_t selection_line_points[] = { {-1, 0}, {12, 0} }; // will be replaced with lv_point_precise_t 
+lv_point_precise_t selection_line_points[] = { {0, 0}, {13, 0} };
 
 struct output_status_state {
     struct zmk_endpoint_instance selected_endpoint;
@@ -66,13 +74,22 @@ struct output_status_state {
 };
 
 static struct output_status_state get_state(const zmk_event_t *_eh) {
-    return (struct output_status_state){
-        .selected_endpoint = zmk_endpoints_selected(),
-        .active_profile_index = zmk_ble_active_profile_index(),
-        .active_profile_connected = zmk_ble_active_profile_is_connected(),
-        .active_profile_bonded = !zmk_ble_active_profile_is_open(),
-        .usb_is_hid_ready = zmk_usb_is_hid_ready()
-    };
+    struct output_status_state st;
+
+    st.selected_endpoint = zmk_endpoints_selected();
+
+#if IS_ENABLED(CONFIG_ZMK_BLE)
+    st.active_profile_index     = zmk_ble_active_profile_index();
+    st.active_profile_connected = zmk_ble_active_profile_is_connected();
+    st.active_profile_bonded    = !zmk_ble_active_profile_is_open();
+#else
+    st.active_profile_index     = 0;
+    st.active_profile_connected = false;
+    st.active_profile_bonded    = false;
+#endif
+
+    st.usb_is_hid_ready = zmk_usb_is_hid_ready();
+    return st;
 }
 
 static void anim_x_cb(void * var, int32_t v) {
@@ -87,7 +104,7 @@ static void move_object_x(void *obj, int32_t from, int32_t to) {
     lv_anim_t a;
     lv_anim_init(&a);
     lv_anim_set_var(&a, obj);
-    lv_anim_set_time(&a, 200); // will be replaced with lv_anim_set_duration
+    lv_anim_set_duration(&a, 200);
     lv_anim_set_exec_cb(&a, anim_x_cb);
     lv_anim_set_path_cb(&a, lv_anim_path_overshoot);
     lv_anim_set_values(&a, from, to);
@@ -98,7 +115,7 @@ static void change_size_object(void *obj, int32_t from, int32_t to) {
     lv_anim_t a;
     lv_anim_init(&a);
     lv_anim_set_var(&a, obj);
-    lv_anim_set_time(&a, 200); // will be replaced with lv_anim_set_duration
+    lv_anim_set_duration(&a, 200);
     lv_anim_set_exec_cb(&a, anim_size_cb);
     lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
     lv_anim_set_values(&a, from, to);
@@ -161,7 +178,9 @@ static void output_status_update_cb(struct output_status_state state) {
 ZMK_DISPLAY_WIDGET_LISTENER(widget_output_status, struct output_status_state,
                             output_status_update_cb, get_state)
 ZMK_SUBSCRIPTION(widget_output_status, zmk_endpoint_changed);
+#if IS_ENABLED(CONFIG_ZMK_BLE)
 ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
+#endif
 ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
 
 int zmk_widget_output_status_init(struct zmk_widget_output_status *widget, lv_obj_t *parent) {
@@ -194,7 +213,7 @@ int zmk_widget_output_status_init(struct zmk_widget_output_status *widget, lv_ob
     selection_line = lv_line_create(widget->obj);
     lv_line_set_points(selection_line, selection_line_points, 2);
     lv_obj_add_style(selection_line, &style_line, 0);
-    lv_obj_align_to(selection_line, usb, LV_ALIGN_OUT_TOP_LEFT, 3, -1);
+    lv_obj_align_to(selection_line, usb, LV_ALIGN_OUT_TOP_LEFT, 3, -2);
  
     sys_slist_append(&widgets, &widget->node);
 

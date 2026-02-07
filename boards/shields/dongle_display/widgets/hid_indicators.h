@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
-
+ 
  #pragma once
 
 #include <lvgl.h>
@@ -16,4 +16,3 @@ struct zmk_widget_hid_indicators {
 
 int zmk_widget_hid_indicators_init(struct zmk_widget_hid_indicators *widget, lv_obj_t *parent);
 lv_obj_t *zmk_widget_hid_indicators_obj(struct zmk_widget_hid_indicators *widget);
-
