@@ -122,12 +122,17 @@ static void set_battery_symbol(lv_obj_t *widget, struct battery_state state) {
     battery_seen[state.source] = true;
 
     draw_battery(symbol, state.level, state.usb_present);
-    lv_label_set_text_fmt(label, "S%u:%3u%%", state.source - SOURCE_OFFSET, state.level);
+    lv_label_set_text_fmt(label, "%3u%%", state.level);
 
-    lv_obj_clear_flag(symbol, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_move_foreground(symbol);
-    lv_obj_clear_flag(label, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_move_foreground(label);
+    if (state.level > 0 || state.usb_present) {
+        lv_obj_clear_flag(symbol, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_move_foreground(symbol);
+        lv_obj_clear_flag(label, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_move_foreground(label);
+    } else {
+        lv_obj_add_flag(symbol, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(label, LV_OBJ_FLAG_HIDDEN);
+    }
 }
 
 void battery_status_update_cb(struct battery_state state) {
@@ -202,11 +207,10 @@ int zmk_widget_dongle_battery_status_init(struct zmk_widget_dongle_battery_statu
         battery_objects[i].label = battery_label;
 
         draw_battery(image_canvas, 0, false);
-        if (i >= SOURCE_OFFSET) {
-            lv_label_set_text_fmt(battery_label, "S%u: --", i - SOURCE_OFFSET);
-        } else {
-            lv_label_set_text(battery_label, "S-: --");
-        }
+        lv_label_set_text(battery_label, "--");
+
+        lv_obj_clear_flag(image_canvas, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(battery_label, LV_OBJ_FLAG_HIDDEN);
     }
 
     sys_slist_append(&widgets, &widget->node);
