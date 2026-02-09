@@ -62,6 +62,8 @@ struct battery_object {
     
 static lv_color_t battery_image_buffer[ZMK_SPLIT_BLE_PERIPHERAL_COUNT + SOURCE_OFFSET][BATTERY_CANVAS_W * BATTERY_CANVAS_H];
 
+static bool battery_seen[ZMK_SPLIT_BLE_PERIPHERAL_COUNT + SOURCE_OFFSET];
+
 static void draw_battery(lv_obj_t *canvas, uint8_t level, bool usb_present) {
     lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
 
@@ -117,18 +119,15 @@ static void set_battery_symbol(lv_obj_t *widget, struct battery_state state) {
     lv_obj_t *symbol = battery_objects[state.source].symbol;
     lv_obj_t *label = battery_objects[state.source].label;
 
+    battery_seen[state.source] = true;
+
     draw_battery(symbol, state.level, state.usb_present);
-    lv_label_set_text_fmt(label, "%4u%% ", state.level);
-    
-    if (state.level > 0 || state.usb_present) {
-        lv_obj_clear_flag(symbol, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_move_foreground(symbol);
-        lv_obj_clear_flag(label, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_move_foreground(label);
-    } else {
-        lv_obj_add_flag(symbol, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(label, LV_OBJ_FLAG_HIDDEN);
-    }
+    lv_label_set_text_fmt(label, "S%u:%3u%%", state.source - SOURCE_OFFSET, state.level);
+
+    lv_obj_clear_flag(symbol, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_foreground(symbol);
+    lv_obj_clear_flag(label, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_foreground(label);
 }
 
 void battery_status_update_cb(struct battery_state state) {
@@ -199,13 +198,15 @@ int zmk_widget_dongle_battery_status_init(struct zmk_widget_dongle_battery_statu
         lv_obj_align(image_canvas, LV_ALIGN_TOP_RIGHT, 0, i * 10);
         lv_obj_align_to(battery_label, image_canvas, LV_ALIGN_OUT_LEFT_MID, 0, 0);
 
-        lv_obj_add_flag(image_canvas, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(battery_label, LV_OBJ_FLAG_HIDDEN);
-        
-        battery_objects[i] = (struct battery_object){
-            .symbol = image_canvas,
-            .label = battery_label,
-        };
+        battery_objects[i].symbol = image_canvas;
+        battery_objects[i].label = battery_label;
+
+        draw_battery(image_canvas, 0, false);
+        if (i >= SOURCE_OFFSET) {
+            lv_label_set_text_fmt(battery_label, "S%u: --", i - SOURCE_OFFSET);
+        } else {
+            lv_label_set_text(battery_label, "S-: --");
+        }
     }
 
     sys_slist_append(&widgets, &widget->node);
