@@ -6,7 +6,7 @@
      };
 
      vddh_batt: battery {
-         compatible = "zmk,battery-nrf-vddh";
+         compatible = "zmk,battery-nrf-vdd";
      };
  };
 
