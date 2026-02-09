@@ -10,7 +10,9 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
+#if IS_ENABLED(CONFIG_ZMK_DONGLE_DISPLAY_DONGLE_BATTERY)
 #include <zmk/battery.h>
+#endif
 #include <zmk/ble.h>
 #include <zmk/display.h>
 #include <zmk/events/battery_state_changed.h>
@@ -142,6 +144,7 @@ static struct battery_state peripheral_battery_status_get_state(const zmk_event_
     };
 }
 
+#if IS_ENABLED(CONFIG_ZMK_DONGLE_DISPLAY_DONGLE_BATTERY)
 static struct battery_state central_battery_status_get_state(const zmk_event_t *eh) {
     const struct zmk_battery_state_changed *ev = as_zmk_battery_state_changed(eh);
     return (struct battery_state) {
@@ -152,6 +155,12 @@ static struct battery_state central_battery_status_get_state(const zmk_event_t *
 #endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
     };
 }
+#else
+static struct battery_state central_battery_status_get_state(const zmk_event_t *eh) {
+    ARG_UNUSED(eh);
+    return (struct battery_state){0};
+}
+#endif
 
 static struct battery_state battery_status_get_state(const zmk_event_t *eh) { 
     if (as_zmk_peripheral_battery_state_changed(eh) != NULL) {
