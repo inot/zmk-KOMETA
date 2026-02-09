@@ -112,17 +112,16 @@ static void set_battery_symbol(lv_obj_t *widget, struct battery_state state) {
     lv_obj_t *label = battery_objects[state.source].label;
 
     draw_battery(symbol, state.level, state.usb_present);
-    lv_label_set_text_fmt(label, "%4u%% ", state.level);
-    
     if (state.level > 0 || state.usb_present) {
-        lv_obj_clear_flag(symbol, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_move_foreground(symbol);
-        lv_obj_clear_flag(label, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_move_foreground(label);
+        lv_label_set_text_fmt(label, "%4u%% ", state.level);
     } else {
-        lv_obj_add_flag(symbol, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(label, LV_OBJ_FLAG_HIDDEN);
+        lv_label_set_text(label, "  --  ");
     }
+
+    lv_obj_clear_flag(symbol, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_foreground(symbol);
+    lv_obj_clear_flag(label, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_foreground(label);
 }
 
 void battery_status_update_cb(struct battery_state state) {
@@ -189,10 +188,8 @@ int zmk_widget_dongle_battery_status_init(struct zmk_widget_dongle_battery_statu
         lv_obj_add_flag(image_canvas, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(battery_label, LV_OBJ_FLAG_HIDDEN);
         
-        battery_objects[i] = (struct battery_object){
-            .symbol = image_canvas,
-            .label = battery_label,
-        };
+        battery_objects[i].symbol = image_canvas;
+        battery_objects[i].label = battery_label;
     }
 
     sys_slist_append(&widgets, &widget->node);

@@ -1,15 +1,5 @@
 #include "kometa.dtsi"
 
- / {
-     chosen {
-         zmk,battery = &vddh_batt;
-     };
-
-     vddh_batt: battery {
-         compatible = "zmk,battery-nrf-vddh";
-     };
- };
-
 &default_transform {
     col-offset = <6>;
 };
