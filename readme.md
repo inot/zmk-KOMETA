@@ -12,6 +12,8 @@
 
  Или найти по запросу: `split dongle`.
 
+![alt text](img/image.png)
+
 ## Сборка
 
  Список целей для сборки находится в `build.yaml`:
