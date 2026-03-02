@@ -1,0 +1,8 @@
+# Copyright (c) 2020 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: Turbo repeat key press (3 Hz while held)
+
+compatible: "zmk,behavior-turbo"
+
+include: one_param.yaml

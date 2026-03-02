@@ -1,0 +1,9 @@
+/ {
+    behaviors {
+        // Behavior can be invoked on peripherals, so name must be <= 8 characters.
+        turbo: turbo {
+            compatible = "zmk,behavior-turbo";
+            #binding-cells = <1>;
+        };
+    };
+};
