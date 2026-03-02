@@ -1,4 +1,5 @@
 #include <dt-bindings/zmk/matrix_transform.h>
+#include <behaviors/turbo.dtsi>
 #include <physical_layouts.dtsi>
 
 / {
