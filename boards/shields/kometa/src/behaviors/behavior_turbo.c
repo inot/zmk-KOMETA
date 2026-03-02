@@ -141,7 +141,7 @@ static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
 static const struct behavior_driver_api behavior_turbo_driver_api = {
     .binding_pressed = on_keymap_binding_pressed,
     .binding_released = on_keymap_binding_released,
-    .locality = BEHAVIOR_LOCALITY_EVENT_SOURCE,
+    .locality = BEHAVIOR_LOCALITY_CENTRAL,
 };
 
 BEHAVIOR_DT_INST_DEFINE(0, behavior_turbo_init, NULL, NULL, NULL, POST_KERNEL,
